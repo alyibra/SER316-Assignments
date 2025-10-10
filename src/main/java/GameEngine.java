@@ -18,25 +18,49 @@ public class GameEngine {
         this.gameOver = false;
         reset();
     }
-
-    public GuessResult makeGuess(int guess) {
-        // Check if user wants to quit (negative number)
-        if (guess < 0) {
-            userQuit = true;
-            return new GuessResult(false, "Exiting game...", attempts);
-        }
-
-        attempts++;
-
-        if (guess == target) {
-            gameWon = true;
-            return new GuessResult(true, "Correct! You guessed it in " + attempts + " attempts.", attempts);
-        } else if (guess < target) {
-            return new GuessResult(false, "Too low! Try a higher number.", attempts);
-        } else {
-            return new GuessResult(false, "Too high! Try a lower number.", attempts);
-        }
+public GuessResult makeGuess(int guess) {
+    if (gameWon || gameOver || userQuit) {
+        return new GuessResult(false, "Game is already finished.", attempts);
     }
+
+    if (guess < 0) {
+        userQuit = true;
+        return new GuessResult(false, "Exiting game...", attempts);
+    }
+
+    attempts++;
+
+    if (guess == target) {
+        gameWon = true;
+        return new GuessResult(true,
+                "Correct! You guessed it in " + attempts + " attempts.",
+                attempts);
+    }
+
+    if (attempts >= MAX_ATTEMPTS) {
+        gameOver = true;
+        return new GuessResult(false,
+                "Game Over! You've used all " + MAX_ATTEMPTS
+                        + " attempts. The number was " + target + ".",
+                attempts);
+    }
+
+    int remaining = MAX_ATTEMPTS - attempts;
+    GuessResult result;
+
+    if (guess < target) {
+        result = new GuessResult(false,
+                "Too low! Try a higher number.", attempts);
+    } else {
+        result = new GuessResult(false,
+                "Too high! Try a lower number.", attempts);
+    }
+
+    result.setRemainingAttempts(remaining);
+    return result;
+}
+
+
 
     public void reset() {
         target = Utils.randomInt(min, max);
